@@ -242,6 +242,14 @@ func tailIdent(expr ast.Expr) (*ast.Ident, bool) {
 		// foo.bar.baz
 		//         ^^^
 		return tailIdent(expr.Sel)
+	case *ast.IndexExpr:
+		// foo[T]
+		// ^^^
+		return tailIdent(expr.X)
+	case *ast.IndexListExpr:
+		// foo[T, U]
+		// ^^^
+		return tailIdent(expr.X)
 	}
 	return nil, false
 }
