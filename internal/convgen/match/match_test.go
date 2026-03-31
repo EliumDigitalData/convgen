@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sublee/convgen/internal/convgen/match"
-	"github.com/sublee/convgen/internal/convgen/parse"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/convgen/match"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // anInj is a dummy injector that does nothing. Passed to NewMatcher to satisfy

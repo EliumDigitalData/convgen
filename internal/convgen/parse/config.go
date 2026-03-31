@@ -12,9 +12,9 @@ import (
 
 	"golang.org/x/tools/go/types/typeutil"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/lcs"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/lcs"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 type Path struct {

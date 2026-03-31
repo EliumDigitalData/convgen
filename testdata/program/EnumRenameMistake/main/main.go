@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type Status int

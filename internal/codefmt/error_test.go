@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
 )
 
 type pkger struct{}

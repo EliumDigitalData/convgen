@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 func wrapErr(err error) error {

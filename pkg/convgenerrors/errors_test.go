@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sublee/convgen/pkg/convgenerrors"
+	"github.com/EliumDigitalData/convgen/pkg/convgenerrors"
 )
 
 func TestNil(t *testing.T) {

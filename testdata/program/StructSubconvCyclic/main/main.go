@@ -5,7 +5,7 @@ package main
 import (
 	fmt "fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

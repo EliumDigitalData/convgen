@@ -7,10 +7,10 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/convgen/match"
-	"github.com/sublee/convgen/internal/convgen/parse"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/convgen/match"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // unionAssigner assigns an interface to another interface by matching their
@@ -193,7 +193,7 @@ func (as unionAssigner) writeAssignCode(w *codefmt.Writer, varX, varY, varErr st
 	printErr := func() {
 		w.Printf("%s = nil\n", varY)
 		if varErr != "" {
-			varConvgenErrors := w.Import("github.com/sublee/convgen/pkg/convgenerrors", "convgenerrors")
+			varConvgenErrors := w.Import("github.com/EliumDigitalData/convgen/pkg/convgenerrors", "convgenerrors")
 			varFmt := w.Import("fmt", "fmt")
 			w.Printf("%s = %s.Wrap(\"%s\", %s.Errorf(\"unknown union impl %%T: %%w\", %s, %s.ErrNoMatch))\n",
 				varErr, varConvgenErrors,

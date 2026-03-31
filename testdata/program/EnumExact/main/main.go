@@ -7,7 +7,7 @@ import (
 
 	"example.com/EnumExact/bar"
 	"example.com/EnumExact/foo"
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var FooToBar = convgen.Enum[foo.Foo, bar.Bar](nil, bar.BarUnknown)

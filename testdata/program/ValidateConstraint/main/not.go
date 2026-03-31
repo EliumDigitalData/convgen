@@ -2,6 +2,6 @@
 
 package main
 
-import "github.com/sublee/convgen"
+import "github.com/EliumDigitalData/convgen"
 
 var Not = convgen.Struct[struct{}, *struct{}](nil)

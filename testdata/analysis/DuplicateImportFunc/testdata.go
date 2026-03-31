@@ -5,7 +5,7 @@ package testdata
 import (
 	"strconv"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 func int2string(int) string { return "" }

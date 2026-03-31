@@ -7,10 +7,10 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/convgen/match"
-	"github.com/sublee/convgen/internal/convgen/parse"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/convgen/match"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // enumAssigner assigns an enum type to another enum type by matching enum
@@ -144,7 +144,7 @@ func (as enumAssigner) writeAssignCode(w *codefmt.Writer, varX, varY, varErr str
 	printErr := func() {
 		w.Printf("%s = %o\n", varY, as.default_)
 		if varErr != "" {
-			varConvgenErrors := w.Import("github.com/sublee/convgen/pkg/convgenerrors", "convgenerrors")
+			varConvgenErrors := w.Import("github.com/EliumDigitalData/convgen/pkg/convgenerrors", "convgenerrors")
 			varFmt := w.Import("fmt", "fmt")
 			w.Printf("%s = %s.Wrap(\"%s\", %s.Errorf(\"unknown enum member %%v: %%w\", %s, %s.ErrNoMatch))\n",
 				varErr, varConvgenErrors,

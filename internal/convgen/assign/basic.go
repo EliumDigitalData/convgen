@@ -3,7 +3,7 @@ package assign
 import (
 	"go/types"
 
-	"github.com/sublee/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
 )
 
 // basicAssigner assigns a basic type to another basic type.

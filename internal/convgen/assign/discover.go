@@ -6,8 +6,8 @@ import (
 
 	"github.com/emirpasic/gods/maps/hashbidimap"
 
-	"github.com/sublee/convgen/internal/convgen/match"
-	"github.com/sublee/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/convgen/match"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
 )
 
 type (

@@ -3,8 +3,8 @@ package assign
 import (
 	"go/token"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // Object is the common interface for things that can be assigned to another

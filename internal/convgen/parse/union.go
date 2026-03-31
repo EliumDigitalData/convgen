@@ -5,8 +5,8 @@ import (
 	"go/token"
 	"go/types"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 type unionParsers struct {

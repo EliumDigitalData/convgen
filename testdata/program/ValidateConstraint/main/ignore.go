@@ -2,6 +2,6 @@
 
 package main
 
-import "github.com/sublee/convgen"
+import "github.com/EliumDigitalData/convgen"
 
 var Ignore = convgen.Struct[struct{}, *struct{}](nil)

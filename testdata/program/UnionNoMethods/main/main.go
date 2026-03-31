@@ -4,7 +4,7 @@ package aiwoejfo
 
 import (
 	"example.com/UnionNoMethods/other"
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

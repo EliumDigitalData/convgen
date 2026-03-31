@@ -7,8 +7,8 @@ import (
 	"github.com/emirpasic/gods/maps/linkedhashmap"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
 )
 
 type (

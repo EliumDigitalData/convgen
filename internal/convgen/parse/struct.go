@@ -8,8 +8,8 @@ import (
 
 	"golang.org/x/tools/go/types/typeutil"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 type structParsers struct{ x, y typeinfo.Type }

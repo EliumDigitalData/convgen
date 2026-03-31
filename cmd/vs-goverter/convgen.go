@@ -5,8 +5,8 @@ package main
 import (
 	"time"
 
-	"github.com/sublee/convgen"
-	"github.com/sublee/convgen/cmd/vs-goverter/api"
+	"github.com/EliumDigitalData/convgen"
+	"github.com/EliumDigitalData/convgen/cmd/vs-goverter/api"
 )
 
 var mod = convgen.Module(

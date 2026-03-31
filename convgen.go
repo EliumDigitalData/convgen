@@ -31,7 +31,7 @@
 // After declaring conversions, run the convgen command. It will generate
 // convgen_gen.go for your package:
 //
-//	go run github.com/sublee/convgen/cmd/convgen
+//	go run github.com/EliumDigitalData/convgen/cmd/convgen
 //
 // # Configurations
 //

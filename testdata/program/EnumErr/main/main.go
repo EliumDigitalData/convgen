@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sublee/convgen"
-	"github.com/sublee/convgen/pkg/convgenerrors"
+	"github.com/EliumDigitalData/convgen"
+	"github.com/EliumDigitalData/convgen/pkg/convgenerrors"
 )
 
 type Foo int

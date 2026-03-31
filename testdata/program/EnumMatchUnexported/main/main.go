@@ -7,7 +7,7 @@ import (
 
 	"example.com/EnumMatchUnexported/city"
 	"example.com/EnumMatchUnexported/enums"
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type Alphabet int

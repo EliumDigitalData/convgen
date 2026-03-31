@@ -14,7 +14,7 @@ import (
 	"example.com/convgenexample/api"
 	"example.com/convgenexample/db"
 	"example.com/convgenexample/pb"
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var mod = convgen.Module(

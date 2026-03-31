@@ -3,7 +3,7 @@
 package testdata
 
 import (
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var C1 = convgen.Struct[struct{}, struct{ a int }](

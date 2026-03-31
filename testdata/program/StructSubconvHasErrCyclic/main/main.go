@@ -6,7 +6,7 @@ import (
 	fmt "fmt"
 	"strconv"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

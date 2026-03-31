@@ -2,7 +2,7 @@ package main
 
 import (
 	"example.com/PackageListError/broken"
-	notfound "github.com/sublee/convgen/NOT_FOUND"
+	notfound "github.com/EliumDigitalData/convgen/NOT_FOUND"
 )
 
 func main() {

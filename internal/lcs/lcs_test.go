@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sublee/convgen/internal/lcs"
+	"github.com/EliumDigitalData/convgen/internal/lcs"
 )
 
 func TestCommonPrefix(t *testing.T) {

@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/tools/go/analysis/analysistest"
 
-	convgeninternal "github.com/sublee/convgen/internal/convgen"
-	"github.com/sublee/convgen/pkg/convgenanalysis"
+	convgeninternal "github.com/EliumDigitalData/convgen/internal/convgen"
+	"github.com/EliumDigitalData/convgen/pkg/convgenanalysis"
 )
 
 // TestAnalysis tests parsing and building errors using the Go analysis
@@ -197,8 +197,8 @@ func newProgramTest(name string, convgenGo, convgenErrorsGo []byte) (*programTes
 		return nil, fmt.Errorf("load test case %s: %v", name, err)
 	}
 
-	test.files["github.com/sublee/convgen/convgen.go"] = convgenGo
-	test.files["github.com/sublee/convgen/pkg/convgenerrors/errors.go"] = convgenErrorsGo
+	test.files["github.com/EliumDigitalData/convgen/convgen.go"] = convgenGo
+	test.files["github.com/EliumDigitalData/convgen/pkg/convgenerrors/errors.go"] = convgenErrorsGo
 	return &test, nil
 }
 
@@ -215,13 +215,13 @@ func (test *programTest) materialize(gopath string) error {
 		}
 	}
 
-	// Write go.mod file for github.com/sublee/convgen
+	// Write go.mod file for github.com/EliumDigitalData/convgen
 	convgenGomodPath := filepath.Join(gopath, "src", "github.com", "sublee", "convgen", "go.mod")
 	convgenGomod := `
-	module github.com/sublee/convgen
+	module github.com/EliumDigitalData/convgen
 	go 1.25.0`
 	if err := os.WriteFile(convgenGomodPath, []byte(convgenGomod), 0o666); err != nil {
-		return fmt.Errorf("write github.com/sublee/convgen/go.mod: %w", err)
+		return fmt.Errorf("write github.com/EliumDigitalData/convgen/go.mod: %w", err)
 	}
 
 	// Write go.mod file for example.com/NAME
@@ -229,9 +229,9 @@ func (test *programTest) materialize(gopath string) error {
 	testGomod := fmt.Sprintf(`
 	module %s
 	go 1.25.0
-	require github.com/sublee/convgen v0.0.0
-	replace github.com/sublee/convgen => %s
-	`, test.PkgPath(), filepath.Join(gopath, filepath.FromSlash("src/github.com/sublee/convgen")))
+	require github.com/EliumDigitalData/convgen v0.0.0
+	replace github.com/EliumDigitalData/convgen => %s
+	`, test.PkgPath(), filepath.Join(gopath, filepath.FromSlash("src/github.com/EliumDigitalData/convgen")))
 	if err := os.WriteFile(testGomodPath, []byte(testGomod), 0o666); err != nil {
 		return fmt.Errorf("write %s/go.mod: %w", test.PkgPath(), err)
 	}

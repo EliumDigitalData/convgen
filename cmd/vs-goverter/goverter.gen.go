@@ -3,7 +3,7 @@
 
 package main
 
-import api "github.com/sublee/convgen/cmd/vs-goverter/api"
+import api "github.com/EliumDigitalData/convgen/cmd/vs-goverter/api"
 
 func init() {
 	GoverterVersion = func(source User) (api.User, error) {

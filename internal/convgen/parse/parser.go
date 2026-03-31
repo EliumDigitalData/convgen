@@ -11,8 +11,8 @@ import (
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/types/typeutil"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 func IsConvgenImport(path string) bool {
@@ -21,7 +21,7 @@ func IsConvgenImport(path string) bool {
 	if i := strings.LastIndex(path, vendorPart); i != -1 && (i == 0 || path[i-1] == '/') {
 		path = path[i+len(vendorPart):]
 	}
-	return path == "github.com/sublee/convgen"
+	return path == "github.com/EliumDigitalData/convgen"
 }
 
 // Parser parses an AST of the underlying package to collect convgen converters.

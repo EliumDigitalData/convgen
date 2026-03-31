@@ -1,4 +1,4 @@
-module github.com/sublee/convgen
+module github.com/EliumDigitalData/convgen
 
 go 1.25.0
 

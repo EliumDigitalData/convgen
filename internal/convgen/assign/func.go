@@ -3,8 +3,8 @@ package assign
 import (
 	"go/token"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // funcAssigner converts a type to another type with a function call.
@@ -71,7 +71,7 @@ func (as funcAssigner) writeAssignCode(w *codefmt.Writer, varX, varY, varErr str
 	}
 
 	setError := func(varTmpErr string) {
-		varConvgenErrors := w.Import("github.com/sublee/convgen/pkg/convgenerrors", "convgenerrors")
+		varConvgenErrors := w.Import("github.com/EliumDigitalData/convgen/pkg/convgenerrors", "convgenerrors")
 		w.Printf("%s = %s.Wrap(\"%s\", %s)\n", varErr, varConvgenErrors, as.x.QualName(), varTmpErr)
 		as.errWrap.writeWrapCode(w, varErr)
 	}

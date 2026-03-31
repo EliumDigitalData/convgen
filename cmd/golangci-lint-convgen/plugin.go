@@ -12,7 +12,7 @@ import (
 	"github.com/golangci/plugin-module-register/register"
 	"golang.org/x/tools/go/analysis"
 
-	"github.com/sublee/convgen/pkg/convgenanalysis"
+	"github.com/EliumDigitalData/convgen/pkg/convgenanalysis"
 )
 
 func init() {

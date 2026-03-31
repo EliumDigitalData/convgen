@@ -7,8 +7,8 @@ import (
 	"iter"
 	"slices"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // Module is a shared context for converters. It holds a registry of converters

@@ -1,8 +1,8 @@
 package assign
 
 import (
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // indexAssigner assigns a slice or array to another slice or array by

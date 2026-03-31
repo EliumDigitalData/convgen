@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 func reverse(s string) string {

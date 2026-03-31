@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var conv = convgen.Struct[struct{ X rune }, struct{ X int32 }](nil)

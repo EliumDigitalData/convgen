@@ -1,7 +1,7 @@
 package assign
 
 import (
-	"github.com/sublee/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
 )
 
 // sameAssigner assigns x to y when they are the same type.

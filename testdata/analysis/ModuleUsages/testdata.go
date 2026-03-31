@@ -5,7 +5,7 @@ package testdata
 import (
 	"fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var mod = convgen.Module() // ok, very valid

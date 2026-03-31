@@ -3,8 +3,8 @@ package assign
 import (
 	"fmt"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // pointerAssigner assigns a pointer to another pointer by unwrapping the

@@ -1,8 +1,8 @@
 package assign
 
 import (
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // errWrapAssigner wraps a conversion error with user-defined functions.

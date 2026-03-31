@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/tools/go/ast/astutil"
 
-	"github.com/sublee/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
 )
 
 // Validate checks for usages outside expected paths. It collects all errors
@@ -27,7 +27,7 @@ func (p *Parser) Validate(mods map[token.Pos]*Module) error {
 	return errs
 }
 
-// validateConstraint checks if files importing "github.com/sublee/convgen" have
+// validateConstraint checks if files importing "github.com/EliumDigitalData/convgen" have
 // "//go:build convgen" constraint.
 func (p *Parser) validateConstraint(file *ast.File) error {
 	// Find convgen import

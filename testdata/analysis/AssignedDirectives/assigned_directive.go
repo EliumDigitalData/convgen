@@ -2,7 +2,7 @@
 
 package testdata
 
-import "github.com/sublee/convgen"
+import "github.com/EliumDigitalData/convgen"
 
 var (
 	_    = convgen.Module()                        // ok

@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	convgeninternal "github.com/sublee/convgen/internal/convgen"
+	convgeninternal "github.com/EliumDigitalData/convgen/internal/convgen"
 )
 
 var Version = "dev"

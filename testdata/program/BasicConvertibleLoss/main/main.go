@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 var conv = convgen.Struct[struct{ X int32 }, struct{ X int8 }](nil)

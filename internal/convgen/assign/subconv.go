@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	"github.com/sublee/convgen/internal/convgen/parse"
-	"github.com/sublee/convgen/internal/typeinfo"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/convgen/parse"
+	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
 // subconv represents an implicit struct-to-struct converter, called

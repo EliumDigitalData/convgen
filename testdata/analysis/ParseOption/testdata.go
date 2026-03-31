@@ -2,7 +2,7 @@
 
 package testdata
 
-import "github.com/sublee/convgen"
+import "github.com/EliumDigitalData/convgen"
 
 var renameToLower = convgen.RenameToLower(true, true) // want `cannot assign RenameToLower to variable`
 

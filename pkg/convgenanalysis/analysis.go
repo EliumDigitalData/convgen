@@ -4,8 +4,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/sublee/convgen/internal/codefmt"
-	convgeninternal "github.com/sublee/convgen/internal/convgen"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
+	convgeninternal "github.com/EliumDigitalData/convgen/internal/convgen"
 )
 
 // Analyzer validates the usage of Convgen in the package.

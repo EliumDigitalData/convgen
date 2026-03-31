@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"example.com/UnionDiscoverBySample/impl"
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

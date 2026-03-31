@@ -7,7 +7,7 @@ import (
 	"go/token"
 	"strconv"
 
-	"github.com/sublee/convgen/internal/codefmt"
+	"github.com/EliumDigitalData/convgen/internal/codefmt"
 )
 
 type arg interface {
