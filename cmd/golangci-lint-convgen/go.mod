@@ -1,14 +1,14 @@
-module github.com/sublee/convgen/cmd/golangci-lint-convgen
+module github.com/EliumDigitalData/convgen/cmd/golangci-lint-convgen
 
 go 1.25.1
 
 require (
 	github.com/golangci/plugin-module-register v0.1.2
-	github.com/sublee/convgen v0.0.0
+	github.com/EliumDigitalData/convgen v0.0.0
 	golang.org/x/tools v0.32.0
 )
 
-replace github.com/sublee/convgen => ../..
+replace github.com/EliumDigitalData/convgen => ../..
 
 require (
 	github.com/emirpasic/gods v1.18.1 // indirect

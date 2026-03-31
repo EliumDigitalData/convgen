@@ -10,8 +10,8 @@
 <p align="center"><i>Refactor-safe type conversion codegen for Go</i></p>
 
 <p align="center">
-<a href="https://github.com/sublee/convgen/actions/workflows/ci.yaml"><img src="https://github.com/sublee/convgen/actions/workflows/ci.yaml/badge.svg" alt="CI"></a>
-<a href="https://pkg.go.dev/github.com/sublee/convgen"><img src="https://pkg.go.dev/badge/github.com/sublee/convgen.svg" alt="Go Reference"></a>
+<a href="https://github.com/EliumDigitalData/convgen/actions/workflows/ci.yaml"><img src="https://github.com/EliumDigitalData/convgen/actions/workflows/ci.yaml/badge.svg" alt="CI"></a>
+<a href="https://pkg.go.dev/github.com/EliumDigitalData/convgen"><img src="https://pkg.go.dev/badge/github.com/EliumDigitalData/convgen.svg" alt="Go Reference"></a>
 </p>
 
 Convgen generates type-to-type conversion code for Go automatically. It's
@@ -102,7 +102,7 @@ directory.
 1. Install Convgen:
 
     ```bash
-    go install github.com/sublee/convgen
+    go install github.com/EliumDigitalData/convgen
     ```
 
 2. Add a build constraint to files containing Convgen directives:

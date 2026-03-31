@@ -11,7 +11,7 @@
     "gopls": {
         "ui.semanticTokens": true,
         "formatting.gofumpt": true,
-        "formatting.local": "github.com/sublee/convgen,example.com",
+        "formatting.local": "github.com/EliumDigitalData/convgen,example.com",
         "build.buildFlags": ["-tags=convgen"],
     },
     "[plaintext]": {

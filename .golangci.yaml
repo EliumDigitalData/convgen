@@ -11,8 +11,8 @@ linters:
   settings:
     errcheck:
       exclude-functions:
-        - (*github.com/sublee/convgen/internal/codefmt.Writer).Printf
-        - github.com/sublee/convgen/internal/codefmt.Fprintf
+        - (*github.com/EliumDigitalData/convgen/internal/codefmt.Writer).Printf
+        - github.com/EliumDigitalData/convgen/internal/codefmt.Fprintf
         - fmt.Fprintf(fmt.State)
         - go/printer.Fprint(*bytes.Buffer)
         - io.Copy

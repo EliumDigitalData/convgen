@@ -19,7 +19,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-**/vendor/github.com/sublee/convgen
+**/vendor/github.com/EliumDigitalData/convgen
 
 # Go workspace file
 go.work

@@ -1,7 +1,7 @@
 # Convgen vs. goverter
 
 This directory contains code to compare
-[Convgen](https://github.com/sublee/convgen) and
+[Convgen](https://github.com/EliumDigitalData/convgen) and
 [goverter](https://github.com/jmattheis/goverter).
 
 Generated code is already checked in. But you can regenerate it by running:
