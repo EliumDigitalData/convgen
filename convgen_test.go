@@ -216,7 +216,7 @@ func (test *programTest) materialize(gopath string) error {
 	}
 
 	// Write go.mod file for github.com/EliumDigitalData/convgen
-	convgenGomodPath := filepath.Join(gopath, "src", "github.com", "sublee", "convgen", "go.mod")
+	convgenGomodPath := filepath.Join(gopath, "src", "github.com", "EliumDigitalData", "convgen", "go.mod")
 	convgenGomod := `
 	module github.com/EliumDigitalData/convgen
 	go 1.25.0`
