@@ -64,8 +64,9 @@ type Config struct {
 	DiscoverNestedX []Path
 	DiscoverNestedY []Path
 
-	MatchEmbeddedDepth int
-	MatchEmbeddedSet   bool
+	MatchEmbeddedDepth        int
+	MatchEmbeddedSet          bool
+	MatchEmbeddedExcludeTypes []types.Type
 
 	ForStruct *Config
 	ForUnion  *Config
@@ -92,6 +93,9 @@ func (cfg Config) Fork() Config {
 	cfg.DiscoverBySamplePkgY = nil
 	cfg.DiscoverNestedX = nil
 	cfg.DiscoverNestedY = nil
+
+	// Preserve MatchEmbedded settings (inherited from module)
+	cfg.MatchEmbeddedExcludeTypes = slices.Clone(cfg.MatchEmbeddedExcludeTypes)
 	return cfg
 }
 
@@ -142,6 +146,7 @@ func (cfg *Config) Update(other Config) {
 		cfg.MatchEmbeddedDepth = other.MatchEmbeddedDepth
 		cfg.MatchEmbeddedSet = true
 	}
+	cfg.MatchEmbeddedExcludeTypes = append(cfg.MatchEmbeddedExcludeTypes, other.MatchEmbeddedExcludeTypes...)
 }
 
 func (cfg Config) ForkForStruct() Config {
@@ -296,6 +301,8 @@ func (p *Parser) ParseOption(cfg *Config, call *ast.CallExpr, ps parsers) error 
 
 	case "MatchEmbedded":
 		return p.ParseOptionMatchEmbedded(cfg, call)
+	case "MatchEmbeddedExclude":
+		return p.ParseOptionMatchEmbeddedExclude(cfg, call)
 	}
 
 	return codefmt.Errorf(p, call.Fun, "%s is not supported option", name)
@@ -738,5 +745,26 @@ func (p *Parser) ParseOptionMatchEmbedded(c *Config, call *ast.CallExpr) error {
 	}
 	c.MatchEmbeddedDepth = depth
 	c.MatchEmbeddedSet = true
+	return nil
+}
+
+func (p *Parser) ParseOptionMatchEmbeddedExclude(c *Config, call *ast.CallExpr) error {
+	if err := needArgs0(p, call); err != nil {
+		return err
+	}
+
+	// The type argument T is encoded in the generic instantiation: call.Fun is
+	// an *ast.IndexExpr for MatchEmbeddedExclude[T]().
+	indexExpr, ok := call.Fun.(*ast.IndexExpr)
+	if !ok {
+		return codefmt.Errorf(p, call.Fun, "MatchEmbeddedExclude requires a type argument: MatchEmbeddedExclude[T]()")
+	}
+
+	tv, ok := p.Pkg().TypesInfo.Types[indexExpr.Index]
+	if !ok || tv.Type == nil {
+		return codefmt.Errorf(p, indexExpr.Index, "cannot resolve type argument for MatchEmbeddedExclude")
+	}
+
+	c.MatchEmbeddedExcludeTypes = append(c.MatchEmbeddedExcludeTypes, tv.Type)
 	return nil
 }

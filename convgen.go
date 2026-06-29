@@ -1006,6 +1006,25 @@ func MatchEmbedded(depth int) Option[yes, yes, yes, no, no] {
 	panic("convgen: not generated")
 }
 
+// MatchEmbeddedExclude marks type T as opaque during embedded struct traversal.
+// When [MatchEmbedded] is active, fields whose type is T (or *T, **T, etc.) are
+// treated as leaf nodes: they are added to the matchable set under their own
+// name but Convgen does not recurse into their sub-fields.
+//
+// This is useful for well-known struct types whose internal layout should not
+// be promoted, such as [time.Time] or domain-specific value types:
+//
+//	var mod = convgen.Module(
+//		convgen.MatchEmbedded(2),
+//		convgen.MatchEmbeddedExclude[time.Time](),
+//	)
+//
+// Multiple types can be excluded by calling MatchEmbeddedExclude multiple times.
+// When specified multiple times, all excluded types are combined.
+func MatchEmbeddedExclude[T any]() Option[yes, yes, yes, no, no] {
+	panic("convgen: not generated")
+}
+
 // FieldGetter casts func() In to In. This helps resolve type errors in
 // [MatchFunc] or [MatchFuncErr] when the specified field is accessed by a
 // getter method:
