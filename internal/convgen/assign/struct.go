@@ -58,10 +58,11 @@ func (fac *factory) tryStruct(x, y Object) (*structAssigner, error) {
 
 	m := match.NewMatcher[structField](fac.inj, fac.cfg, x, y)
 	errs := discover(fac, m, structDiscovery{
-		cfg: fac.cfg,
-		pkg: fac.Pkg(),
-		x:   x,
-		y:   y,
+		cfg:    fac.cfg,
+		pkg:    fac.Pkg(),
+		x:      x,
+		y:      y,
+		module: fac.inj.Module,
 	})
 	matches, err := m.Match()
 	errs = errors.Join(errs, err)
@@ -171,9 +172,40 @@ func (o structField) Pos() token.Pos {
 
 // structDiscovery discovers fields and getter/setter methods of struct types.
 type structDiscovery struct {
-	pkg  *packages.Package
-	cfg  parse.Config
-	x, y Object
+	pkg    *packages.Package
+	cfg    parse.Config
+	x, y   Object
+	module *parse.Module // may be nil; used to check for existing converters
+}
+
+// moduleConverterFrom reports whether any converter registered in the module
+// accepts the given type as its input. Used to keep X-side struct fields as
+// leaves so an existing converter is used rather than promoting sub-fields.
+func (d structDiscovery) moduleConverterFrom(t typeinfo.Type) bool {
+	if d.module == nil {
+		return false
+	}
+	for fn := range d.module.Range() {
+		if types.Identical(fn.X().T, t.T) {
+			return true
+		}
+	}
+	return false
+}
+
+// moduleConverterTo reports whether any converter registered in the module
+// produces the given type as its output. Used to keep Y-side struct fields as
+// leaves so an existing converter result can be stored into the field directly.
+func (d structDiscovery) moduleConverterTo(t typeinfo.Type) bool {
+	if d.module == nil {
+		return false
+	}
+	for fn := range d.module.Range() {
+		if types.Identical(fn.Y().T, t.T) {
+			return true
+		}
+	}
+	return false
 }
 
 // DiscoverX discovers fields and getter methods of struct X and nested fields
@@ -181,7 +213,7 @@ type structDiscovery struct {
 func (d structDiscovery) DiscoverX(add addFunc[structField], del deleteFunc) error {
 	var errs error
 	if d.cfg.MatchEmbeddedDepth > 0 {
-		if err := d.discoverFieldsEmbedded(d.x, d.cfg.MatchEmbeddedDepth, add); err != nil {
+		if err := d.discoverFieldsEmbedded(d.x, d.cfg.MatchEmbeddedDepth, add, d.moduleConverterFrom); err != nil {
 			errs = errors.Join(errs, err)
 		}
 	} else {
@@ -207,7 +239,7 @@ func (d structDiscovery) DiscoverX(add addFunc[structField], del deleteFunc) err
 func (d structDiscovery) DiscoverY(add addFunc[structField], del deleteFunc) error {
 	var errs error
 	if d.cfg.MatchEmbeddedDepth > 0 {
-		if err := d.discoverFieldsEmbedded(d.y, d.cfg.MatchEmbeddedDepth, add); err != nil {
+		if err := d.discoverFieldsEmbedded(d.y, d.cfg.MatchEmbeddedDepth, add, d.moduleConverterTo); err != nil {
 			errs = errors.Join(errs, err)
 		}
 	} else {
@@ -229,11 +261,14 @@ func (d structDiscovery) DiscoverY(add addFunc[structField], del deleteFunc) err
 }
 
 // discoverFieldsEmbedded recursively discovers fields of owner up to maxDepth
-// levels of nesting. Struct-typed fields at depth < maxDepth are transparent:
-// their children are promoted but they themselves are not added to the matchable
-// set. The shallowest instance of each field name wins; equal-depth collisions
-// via different paths produce an ambiguity error.
-func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add addFunc[structField]) error {
+// levels of nesting. A struct-typed field at depth < maxDepth is transparent
+// (its children are promoted and the field itself is not added to the matchable
+// set) unless it is excluded via MatchEmbeddedExclude or the provided
+// hasExistingConverter reports that the module already handles that type. In
+// the latter case the field is kept as a leaf so the existing converter is used.
+// The shallowest instance of each field name wins; equal-depth collisions via
+// different paths produce an ambiguity error.
+func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add addFunc[structField], hasExistingConverter func(typeinfo.Type) bool) error {
 	byName := map[string]*embeddedEntry{}
 
 	var traverse func(owner Object, depth int)
@@ -256,7 +291,9 @@ func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add 
 			}
 
 			fieldType := typeinfo.TypeOf(f.Type()).Deref()
-			isTransparent := fieldType.IsStruct() && depth < maxDepth && !d.isEmbeddedExcluded(fieldType)
+			isTransparent := fieldType.IsStruct() && depth < maxDepth &&
+				!d.isEmbeddedExcluded(fieldType) &&
+				!hasExistingConverter(fieldType)
 
 			if isTransparent {
 				// Recurse into this struct field; do not add it to the matchable set.
