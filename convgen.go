@@ -982,6 +982,30 @@ func DiscoverNested(inPath, outPath Path) Option[no, no, yes, no, no] {
 	panic("convgen: not generated")
 }
 
+// MatchEmbedded enables automatic matching of fields nested inside struct
+// fields up to the given nesting depth. A depth of 0 disables embedded
+// matching (the default).
+//
+// When active, each struct-typed field at depth less than the maximum is
+// treated as transparent: its sub-fields are promoted for matching but the
+// intermediate field itself is not presented as a matchable item.
+//
+// Matching always prefers the shallowest nesting level on each side
+// independently. If the same field name is reachable via multiple paths at
+// the same minimum depth on either side, a generation-time error is produced.
+//
+// Example:
+//
+//	type AuditData struct{ CreatedAt, UpdatedAt time.Time }
+//	type A struct{ Name string; CreatedAt, UpdatedAt time.Time }
+//	type B struct{ Name string; AuditData }
+//
+//	var mod = convgen.Module(convgen.MatchEmbedded(1))
+//	var A2B = convgen.Struct[A, B](mod) // A.CreatedAt -> B.AuditData.CreatedAt
+func MatchEmbedded(depth int) Option[yes, yes, yes, no, no] {
+	panic("convgen: not generated")
+}
+
 // FieldGetter casts func() In to In. This helps resolve type errors in
 // [MatchFunc] or [MatchFuncErr] when the specified field is accessed by a
 // getter method:

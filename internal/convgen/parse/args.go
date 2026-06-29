@@ -11,7 +11,7 @@ import (
 )
 
 type arg interface {
-	bool | string
+	bool | string | int
 }
 
 func parseArgExpr[T arg](p *Parser, expr ast.Expr) (T, error) {
@@ -35,10 +35,30 @@ func parseArgExpr[T arg](p *Parser, expr ast.Expr) (T, error) {
 		x, _ := strconv.Unquote(lit.Value)
 		v = any(x).(T)
 
+	case int:
+		tv := p.Pkg().TypesInfo.Types[expr]
+		if tv.Value == nil || tv.Value.Kind() != constant.Int {
+			return v, codefmt.Errorf(p, expr, "%s is not int literal", expr)
+		}
+		n, exact := constant.Int64Val(tv.Value)
+		if !exact {
+			return v, codefmt.Errorf(p, expr, "%s overflows int", expr)
+		}
+		v = any(int(n)).(T)
+
 	default:
 		panic("unreachable")
 	}
 	return v, nil
+}
+
+func parseArgs1[T1 arg](p *Parser, call *ast.CallExpr) (T1, error) {
+	var v1 T1
+	expr1, err := needArgs1(p, call)
+	if err != nil {
+		return v1, err
+	}
+	return parseArgExpr[T1](p, expr1)
 }
 
 func parseArgs2[T1, T2 arg](p *Parser, call *ast.CallExpr) (T1, T2, error) {
