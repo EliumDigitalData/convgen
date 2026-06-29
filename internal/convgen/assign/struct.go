@@ -18,6 +18,13 @@ import (
 	"github.com/EliumDigitalData/convgen/internal/typeinfo"
 )
 
+// embeddedEntry tracks a discovered field candidate during embedded traversal.
+type embeddedEntry struct {
+	sf    structField
+	depth int
+	count int // number of equal-depth paths; >1 means ambiguous
+}
+
 // structAssigner performs assignment between two struct types by matching
 // their fields and methods. It supports structs at any pointer depth.
 type structAssigner struct {
@@ -172,10 +179,16 @@ type structDiscovery struct {
 // DiscoverX discovers fields and getter methods of struct X and nested fields
 // if enabled.
 func (d structDiscovery) DiscoverX(add addFunc[structField], del deleteFunc) error {
-	d.discoverFields(d.x, add)
+	var errs error
+	if d.cfg.MatchEmbeddedDepth > 0 {
+		if err := d.discoverFieldsEmbedded(d.x, d.cfg.MatchEmbeddedDepth, add); err != nil {
+			errs = errors.Join(errs, err)
+		}
+	} else {
+		d.discoverFields(d.x, add)
+	}
 	d.discoverGetters(d.x, add)
 
-	var errs error
 	for _, path := range d.cfg.DiscoverNestedX {
 		field, _, err := d.ResolveX(path)
 		if err != nil {
@@ -192,10 +205,16 @@ func (d structDiscovery) DiscoverX(add addFunc[structField], del deleteFunc) err
 // DiscoverY discovers fields and setter methods of struct Y and nested fields
 // if enabled.
 func (d structDiscovery) DiscoverY(add addFunc[structField], del deleteFunc) error {
-	d.discoverFields(d.y, add)
+	var errs error
+	if d.cfg.MatchEmbeddedDepth > 0 {
+		if err := d.discoverFieldsEmbedded(d.y, d.cfg.MatchEmbeddedDepth, add); err != nil {
+			errs = errors.Join(errs, err)
+		}
+	} else {
+		d.discoverFields(d.y, add)
+	}
 	d.discoverSetters(d.y, add)
 
-	var errs error
 	for _, path := range d.cfg.DiscoverNestedY {
 		field, _, err := d.ResolveY(path)
 		if err != nil {
@@ -205,6 +224,71 @@ func (d structDiscovery) DiscoverY(add addFunc[structField], del deleteFunc) err
 		del(field.Pos())
 		d.discoverFields(field, add)
 		d.discoverSetters(field, add)
+	}
+	return errs
+}
+
+// discoverFieldsEmbedded recursively discovers fields of owner up to maxDepth
+// levels of nesting. Struct-typed fields at depth < maxDepth are transparent:
+// their children are promoted but they themselves are not added to the matchable
+// set. The shallowest instance of each field name wins; equal-depth collisions
+// via different paths produce an ambiguity error.
+func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add addFunc[structField]) error {
+	byName := map[string]*embeddedEntry{}
+
+	var traverse func(owner Object, depth int)
+	traverse = func(owner Object, depth int) {
+		t := owner.Type().Deref()
+		if !t.IsStruct() {
+			return
+		}
+		for f := range t.Struct.Fields() {
+			if !f.Exported() && !d.cfg.DiscoverUnexportedEnabled {
+				continue
+			}
+
+			sf := structField{
+				owner: owner,
+				field: f,
+				name:  f.Name(),
+				typ:   typeinfo.TypeOf(f.Type()),
+				pkg:   d.pkg,
+			}
+
+			fieldType := typeinfo.TypeOf(f.Type()).Deref()
+			isTransparent := fieldType.IsStruct() && depth < maxDepth
+
+			if isTransparent {
+				// Recurse into this struct field; do not add it to the matchable set.
+				traverse(sf, depth+1)
+			} else {
+				key := f.Name()
+				if e, ok := byName[key]; ok {
+					if depth < e.depth {
+						byName[key] = &embeddedEntry{sf: sf, depth: depth, count: 1}
+					} else if depth == e.depth {
+						e.count++
+					}
+					// depth > e.depth: ignore; shallower entry already recorded
+				} else {
+					byName[key] = &embeddedEntry{sf: sf, depth: depth, count: 1}
+				}
+			}
+		}
+	}
+
+	traverse(owner, 0)
+
+	var errs error
+	for name, e := range byName {
+		if e.count > 1 {
+			errs = errors.Join(errs, fmt.Errorf(
+				"ambiguous embedded field %q in %s: multiple paths reach it at nesting depth %d",
+				name, owner.CrumbName(), e.depth,
+			))
+		} else {
+			add(e.sf, name)
+		}
 	}
 	return errs
 }

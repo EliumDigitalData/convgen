@@ -64,6 +64,9 @@ type Config struct {
 	DiscoverNestedX []Path
 	DiscoverNestedY []Path
 
+	MatchEmbeddedDepth int
+	MatchEmbeddedSet   bool
+
 	ForStruct *Config
 	ForUnion  *Config
 	ForEnum   *Config
@@ -133,6 +136,11 @@ func (cfg *Config) Update(other Config) {
 		cfg.DiscoverSettersEnabled = true
 		cfg.DiscoverSettersPrefix = other.DiscoverSettersPrefix
 		cfg.DiscoverSettersSuffix = other.DiscoverSettersSuffix
+	}
+
+	if other.MatchEmbeddedSet {
+		cfg.MatchEmbeddedDepth = other.MatchEmbeddedDepth
+		cfg.MatchEmbeddedSet = true
 	}
 }
 
@@ -310,6 +318,9 @@ func (p *Parser) ParseOption(cfg *Config, call *ast.CallExpr, ps parsers, fetchM
 		return p.ParseOptionDiscoverFieldsOnly(cfg, call)
 	case "DiscoverNested":
 		return p.ParseOptionDiscoverNested(cfg, call, ps)
+
+	case "MatchEmbedded":
+		return p.ParseOptionMatchEmbedded(cfg, call)
 	}
 
 	return codefmt.Errorf(p, call.Fun, "%s is not supported option", name)
@@ -755,5 +766,18 @@ func (p *Parser) ParseOptionDiscoverNested(c *Config, call *ast.CallExpr, ps par
 	if pathY.IsValid() {
 		c.DiscoverNestedY = append(c.DiscoverNestedY, pathY)
 	}
+	return nil
+}
+
+func (p *Parser) ParseOptionMatchEmbedded(c *Config, call *ast.CallExpr) error {
+	depth, err := parseArgs1[int](p, call)
+	if err != nil {
+		return err
+	}
+	if depth < 0 {
+		return codefmt.Errorf(p, call, "MatchEmbedded depth must be non-negative")
+	}
+	c.MatchEmbeddedDepth = depth
+	c.MatchEmbeddedSet = true
 	return nil
 }

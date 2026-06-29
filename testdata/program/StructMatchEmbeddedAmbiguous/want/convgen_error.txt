@@ -1,0 +1,3 @@
+main/main.go:22:12: invalid match between Src and Dst
+    FAIL: ? -> ID // missing
+ambiguous embedded field "ID" in Src: multiple paths reach it at nesting depth 1
