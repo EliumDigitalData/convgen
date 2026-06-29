@@ -7,8 +7,9 @@ import (
 )
 
 type (
-	embX struct{ A int }
-	embY struct{ A int }
+	embX  struct{ A int }
+	embY  struct{ A int }
+	embSt struct{ Z int }
 )
 
 // valid depth
@@ -24,4 +25,10 @@ var Emb2 = convgen.Struct[embX, embY](nil,
 // negative depth is not allowed
 var Emb3 = convgen.Struct[embX, embY](nil,
 	convgen.MatchEmbedded(-1), // want `MatchEmbedded depth must be non-negative`
+)
+
+// exclude with a type argument is ok
+var Emb4 = convgen.Struct[embX, embY](nil,
+	convgen.MatchEmbedded(1),
+	convgen.MatchEmbeddedExclude[embSt](), // ok
 )

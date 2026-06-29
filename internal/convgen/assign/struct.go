@@ -256,7 +256,7 @@ func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add 
 			}
 
 			fieldType := typeinfo.TypeOf(f.Type()).Deref()
-			isTransparent := fieldType.IsStruct() && depth < maxDepth
+			isTransparent := fieldType.IsStruct() && depth < maxDepth && !d.isEmbeddedExcluded(fieldType)
 
 			if isTransparent {
 				// Recurse into this struct field; do not add it to the matchable set.
@@ -291,6 +291,18 @@ func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add 
 		}
 	}
 	return errs
+}
+
+// isEmbeddedExcluded reports whether t is in the configured exclusion list for
+// embedded traversal. Comparison is performed on the fully-dereferenced type so
+// that *T and **T are treated the same as T.
+func (d structDiscovery) isEmbeddedExcluded(t typeinfo.Type) bool {
+	for _, excl := range d.cfg.MatchEmbeddedExcludeTypes {
+		if types.Identical(t.T, excl) {
+			return true
+		}
+	}
+	return false
 }
 
 // discoverFields discovers fields of the given struct object and adds them.
