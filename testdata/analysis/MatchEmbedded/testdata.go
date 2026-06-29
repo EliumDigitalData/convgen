@@ -3,7 +3,7 @@
 package testdata
 
 import (
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 type (

@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 // X has Value at both depth 0 and depth 1 (inside Inner).

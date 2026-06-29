@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sublee/convgen"
+	"github.com/EliumDigitalData/convgen"
 )
 
 // Timestamp is a struct type we want to keep opaque — its internal fields
