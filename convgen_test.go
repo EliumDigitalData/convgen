@@ -108,6 +108,75 @@ func TestPrograms(t *testing.T) {
 	}
 }
 
+// TestDeterministicOutput ensures that the generated code layout is stable
+// across repeated generation runs. The field and import ordering of the
+// generated code must not depend on Go's randomized map iteration order, so
+// running Convgen twice on the same input must produce byte-identical output.
+//
+// The selected programs exercise embedded and nested field discovery, which
+// previously reordered generated fields on every run because field candidates
+// were collected in a plain map and emitted in map-iteration order.
+func TestDeterministicOutput(t *testing.T) {
+	// Programs with more than one promoted/embedded field, so map-iteration
+	// randomization (if reintroduced) reliably reorders their generated fields.
+	names := []string{
+		"StructMatchEmbedded",
+		"StructMatchEmbeddedBidirectional",
+		"StructMatchEmbeddedExclude",
+		"StructDiscoverNested",
+	}
+
+	convgenGo, err := os.ReadFile("convgen.go")
+	require.NoError(t, err)
+	convgenErrorsGo, err := os.ReadFile(filepath.FromSlash("pkg/convgenerrors/errors.go"))
+	require.NoError(t, err)
+
+	for _, name := range names {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			defer func() {
+				if t.Failed() {
+					t.Logf("\n\tReproduce:\tgo run ./cmd/convgen ./testdata/program/%s/main", name)
+				}
+			}()
+
+			test, err := newProgramTest(name, convgenGo, convgenErrorsGo)
+			require.NoError(t, err)
+
+			gopath := os.TempDir() + "/convgen_determinism_" + name
+			require.NoError(t, test.materialize(gopath), "Materialization failed")
+
+			wd := filepath.Join(gopath, "src", filepath.FromSlash(test.PkgPath()))
+			env := append(os.Environ(), "GOPATH="+gopath)
+
+			// Generate several times. Go randomizes map iteration order per range,
+			// so any non-determinism in the layout surfaces within a few runs.
+			const runs = 8
+			var first map[string][]byte
+			for i := range runs {
+				generated, convgenErr := convgeninternal.Main(
+					t.Context(), wd, env, "", false, "convgen_gen.go",
+					[]string{"pattern=./" + test.mainPkg},
+				)
+				require.NoError(t, convgenErr, "Convgen exited with errors unexpectedly")
+				require.NotEmpty(t, generated, "Convgen generated no output")
+
+				if first == nil {
+					first = generated
+					continue
+				}
+
+				require.Equal(t, len(first), len(generated), "run %d produced a different set of files", i)
+				for path, want := range first {
+					assert.Equal(t, string(want), string(generated[path]),
+						"generated output for %q is not deterministic (differs on run %d)", path, i)
+				}
+			}
+		})
+	}
+}
+
 // programTest is a test case for a program. It executes Convgen for the program
 // and runs the program with generated code to check the output.
 type programTest struct {

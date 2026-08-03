@@ -270,6 +270,11 @@ func (d structDiscovery) DiscoverY(add addFunc[structField], del deleteFunc) err
 // different paths produce an ambiguity error.
 func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add addFunc[structField], hasExistingConverter func(typeinfo.Type) bool) error {
 	byName := map[string]*embeddedEntry{}
+	// order records field names in first-seen (depth-first, declaration) order so
+	// that the fields are added to the matcher deterministically. Ranging over
+	// byName directly would use Go's randomized map iteration order, which makes
+	// the generated field layout non-deterministic across runs.
+	var order []string
 
 	var traverse func(owner Object, depth int)
 	traverse = func(owner Object, depth int) {
@@ -309,6 +314,7 @@ func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add 
 					// depth > e.depth: ignore; shallower entry already recorded
 				} else {
 					byName[key] = &embeddedEntry{sf: sf, depth: depth, count: 1}
+					order = append(order, key)
 				}
 			}
 		}
@@ -317,7 +323,8 @@ func (d structDiscovery) discoverFieldsEmbedded(owner Object, maxDepth int, add 
 	traverse(owner, 0)
 
 	var errs error
-	for name, e := range byName {
+	for _, name := range order {
+		e := byName[name]
 		if e.count > 1 {
 			errs = errors.Join(errs, fmt.Errorf(
 				"ambiguous embedded field %q in %s: multiple paths reach it at nesting depth %d",
