@@ -186,7 +186,8 @@ func (d structDiscovery) moduleConverterFrom(t typeinfo.Type) bool {
 		return false
 	}
 	for fn := range d.module.Range() {
-		if types.Identical(fn.X().T, t.T) {
+		//if types.Identical(fn.X().T, t.T) {
+		if types.Identical(fn.X().Deref().T, t.Deref().T) {
 			return true
 		}
 	}
@@ -201,7 +202,8 @@ func (d structDiscovery) moduleConverterTo(t typeinfo.Type) bool {
 		return false
 	}
 	for fn := range d.module.Range() {
-		if types.Identical(fn.Y().T, t.T) {
+		//if types.Identical(fn.Y().T, t.T) {
+		if types.Identical(fn.Y().Deref().T, t.Deref().T) {
 			return true
 		}
 	}
