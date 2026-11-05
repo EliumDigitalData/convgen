@@ -51,7 +51,7 @@ func (as errWrapAssigner) writeAssignCode(w *codefmt.Writer, varX, _, varErr str
 	if as.Name() != "" {
 		w.Printf("%o", as.Func)
 	} else if as.FuncLit() != nil {
-		w.Printf("%c", as.Func.FuncLit())
+		w.Printf("%c", codefmt.RewriteImports(w, as.Func.FuncLit()))
 	}
 	w.Printf("(%s)\n", varX)
 }
