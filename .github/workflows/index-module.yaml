@@ -34,14 +34,24 @@ jobs:
           URL="https://sum.golang.org/lookup/${ESCAPED}@${VERSION}"
 
           echo "Looking up ${MODULE}@${VERSION} ($URL)"
-          for attempt in 1 2 3 4 5; do
-            if curl -fsSL "$URL" -o /dev/null; then
+
+          # The very first lookup for a module/version can be slow: sum.golang.org
+          # has to ask proxy.golang.org, which in turn has to fetch the tag from
+          # the origin VCS, before either of them has anything cached. Retry with
+          # backoff rather than a single short attempt.
+          delay=5
+          for attempt in $(seq 1 10); do
+            code="$(curl -sS -o response.txt -w '%{http_code}' "$URL")"
+            if [ "$code" = "200" ]; then
               echo "Indexed ${MODULE}@${VERSION}"
+              cat response.txt
               exit 0
             fi
-            echo "Attempt ${attempt} failed, retrying in 5s..."
-            sleep 5
+            echo "Attempt ${attempt} got HTTP ${code}, retrying in ${delay}s..."
+            cat response.txt
+            sleep "$delay"
+            delay=$(( delay < 30 ? delay + 5 : 30 ))
           done
 
-          echo "Failed to index ${MODULE}@${VERSION} after 5 attempts" >&2
+          echo "Failed to index ${MODULE}@${VERSION} after 10 attempts" >&2
           exit 1
