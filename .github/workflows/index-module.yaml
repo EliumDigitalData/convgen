@@ -1,0 +1,47 @@
+name: Index Module
+
+# Notifies the Go checksum database of a newly pushed tag, so that `go get`
+# doesn't have to wait for sum.golang.org to discover and fetch the new
+# version on its own the first time someone requests it.
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Request module version from the Go checksum database
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          MODULE="$(go list -m)"
+          # sum.golang.org expects the module path escaped per
+          # golang.org/x/mod/module.EscapePath: each uppercase letter is
+          # replaced with "!" followed by its lowercase form.
+          ESCAPED="$(printf '%s' "$MODULE" | sed -E 's/([A-Z])/!\L\1/g')"
+          URL="https://sum.golang.org/lookup/${ESCAPED}@${VERSION}"
+
+          echo "Looking up ${MODULE}@${VERSION} ($URL)"
+          for attempt in 1 2 3 4 5; do
+            if curl -fsSL "$URL" -o /dev/null; then
+              echo "Indexed ${MODULE}@${VERSION}"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed, retrying in 5s..."
+            sleep 5
+          done
+
+          echo "Failed to index ${MODULE}@${VERSION} after 5 attempts" >&2
+          exit 1
