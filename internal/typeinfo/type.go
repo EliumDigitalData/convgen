@@ -19,6 +19,7 @@ type Type struct {
 	Interface *types.Interface
 	Pointer   *types.Pointer
 	Named     *types.Named
+	TypeParam *types.TypeParam
 
 	Elem *Type
 	Key  *Type
@@ -36,6 +37,7 @@ func (t Type) IsStruct() bool    { return t.Struct != nil }
 func (t Type) IsInterface() bool { return t.Interface != nil }
 func (t Type) IsPointer() bool   { return t.Pointer != nil }
 func (t Type) IsNamed() bool     { return t.Named != nil }
+func (t Type) IsTypeParam() bool { return t.TypeParam != nil }
 
 func (t Type) IsNil() bool   { return t.T == types.Universe.Lookup("nil").Type() }
 func (t Type) IsError() bool { return t.T == types.Universe.Lookup("error").Type() }
@@ -71,6 +73,8 @@ func TypeOf(t types.Type) Type {
 		return info
 	case *types.Signature:
 		return Type{T: t}
+	case *types.TypeParam:
+		return Type{T: t, TypeParam: tt}
 	case *types.Tuple:
 		if tt.Len() == 0 {
 			return Type{T: t}

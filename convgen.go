@@ -486,6 +486,25 @@ func ImportFuncErr[In, Out any](fn func(In) (Out, error)) Option[yes, no, no, no
 	panic("convgen: not generated")
 }
 
+// G is a sentinel placeholder type. Use it as the type argument(s) when
+// passing a generic function to [ImportFunc] or [ImportFuncErr], to register
+// a converter that applies to any concrete instantiation of the function's
+// type parameter(s), instead of locking in one concrete signature:
+//
+//	func Nullable2Optional[T any](v nullable.Nullable[T]) types.Optional[T] {
+//		...
+//	}
+//
+//	var mod = convgen.Module(convgen.ImportFunc(Nullable2Optional[G]))
+//
+// Go does not allow referencing an uninstantiated generic function as a
+// value, so some type argument must be written at the call site; G exists
+// to satisfy the compiler there. It is detected by Convgen by identity, not
+// by value, and is never actually instantiated as a real type parameter. G
+// must be used for every type parameter of the function, or none — for
+// example, convgen.ImportFunc(Foo[G, int]) is a configuration error.
+type G struct{}
+
 // ImportErrWrap appends an error wrapper function (func(error) error) to the
 // module. An error wrapper is typically used to annotate errors with additional
 // context, such as stack traces or error codes.

@@ -2,6 +2,8 @@ package assign
 
 import (
 	"go/token"
+	"go/types"
+	"strings"
 
 	"github.com/EliumDigitalData/convgen/internal/codefmt"
 	"github.com/EliumDigitalData/convgen/internal/typeinfo"
@@ -15,6 +17,14 @@ type funcAssigner struct {
 	typeinfo.Func
 	x, y    Object
 	errWrap *errWrapAssigner
+
+	// genericArgs holds the type arguments solved for a wildcard generic
+	// converter (see tryGenericModuleFunc). It is nil for ordinary
+	// (non-generic or exactly-instantiated) function assigners. It is only
+	// used to register imports for packages referenced by the solved type
+	// arguments, which are baked into Func.Name() as plain text and so are not
+	// otherwise discovered by the writer's usual import tracking.
+	genericArgs []types.Type
 }
 
 func (as funcAssigner) requiresErr() bool { return as.Func.HasErr() }
@@ -58,8 +68,94 @@ func (fac *factory) tryModuleFunc(x, y Object) (*funcAssigner, error) {
 	return nil, skip
 }
 
+// callGenericFunc creates a [funcAssigner] that calls the given wildcard
+// generic function, instantiated with targs, to convert x to y.
+func (fac *factory) callGenericFunc(x, y Object, fn typeinfo.Func, targs []types.Type) (*funcAssigner, error) {
+	as, err := fac.callFunc(x, y, fn)
+	if err != nil {
+		return nil, err
+	}
+	as.genericArgs = targs
+	return as, nil
+}
+
+// tryGenericModuleFunc tries every wildcard generic function registered in the
+// module (via convgen.ImportFunc(fn[convgen.G, ...]) or ImportFuncErr),
+// structurally unifying its declared X/Y pattern against the concrete (x, y)
+// pair, and emitting a concrete instantiated call for the match. It reports an
+// error if more than one registered wildcard function matches.
+func (fac *factory) tryGenericModuleFunc(x, y Object) (*funcAssigner, error) {
+	var matched []typeinfo.Func
+	var matchedArgs [][]types.Type
+
+	for _, fn := range fac.inj.Module.GenericFuncs {
+		targs, ok := typeinfo.UnifyFuncTypeArgs(fn, x.Type().Type(), y.Type().Type())
+		if !ok {
+			continue
+		}
+
+		sig := fn.Object().Type().(*types.Signature)
+		instAny, err := types.Instantiate(nil, sig, targs, true)
+		if err != nil {
+			// Solved type arguments do not satisfy the function's type
+			// constraints; this candidate does not apply.
+			continue
+		}
+		instSig := instAny.(*types.Signature)
+
+		name := fac.genericFuncName(fn, targs)
+		newObj := types.NewFunc(fn.Object().Pos(), fn.Object().Pkg(), name, instSig)
+		instFn, err := typeinfo.FuncOf[typeinfo.BothXY](newObj)
+		if err != nil {
+			continue // defensive; the instantiated shape always matches BothXY
+		}
+
+		matched = append(matched, instFn)
+		matchedArgs = append(matchedArgs, targs)
+	}
+
+	switch len(matched) {
+	case 0:
+		return nil, skip
+	case 1:
+		return fac.callGenericFunc(x, y, matched[0], matchedArgs[0])
+	default:
+		names := make([]string, len(matched))
+		for i, fn := range matched {
+			names[i] = codefmt.New(fac.Pkg()).Obj(fn.Object())
+		}
+		return nil, codefmt.Errorf(fac, fac.inj, "ambiguous generic converters from %s to %s: %s",
+			x.DebugName(), y.DebugName(), strings.Join(names, ", "))
+	}
+}
+
+// genericFuncName builds the synthetic bracket-decorated display name for a
+// solved wildcard instantiation, e.g. "Nullable2Optional[string]". Unlike
+// getFuncObj's exact-instantiation case, there is no source ast.Expr for a
+// unification-solved type argument (it was computed, not written by the
+// user), so each solved type is rendered via Formatter.Type instead of an
+// ast.Expr.
+func (fac *factory) genericFuncName(fn typeinfo.Func, targs []types.Type) string {
+	f := codefmt.New(fac.Pkg())
+	var b strings.Builder
+	b.WriteString(fn.Object().Name())
+	b.WriteString("[")
+	for i, t := range targs {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString(f.Type(t))
+	}
+	b.WriteString("]")
+	return b.String()
+}
+
 // writeAssignCode writes code that assigns x to y by calling the function.
 func (as funcAssigner) writeAssignCode(w *codefmt.Writer, varX, varY, varErr string) {
+	for _, t := range as.genericArgs {
+		w.ImportType(t)
+	}
+
 	varTmpErr := w.Name("err")
 
 	printFunc := func() {

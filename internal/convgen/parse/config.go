@@ -33,6 +33,15 @@ type Config struct {
 	FuncExprs []ast.Expr
 	ErrWraps  []typeinfo.Func
 
+	// GenericFuncs holds wildcard generic converter registrations made via
+	// convgen.ImportFunc(fn[convgen.G, ...]) / convgen.ImportFuncErr(...).
+	// Each retains the function's original generic declaration — its X()/Y()
+	// may still contain *types.TypeParam leaves — rather than one locked-in
+	// concrete signature. It is resolved per concrete (x, y) field pair at
+	// assign time via structural unification (internal/typeinfo/unify.go).
+	GenericFuncs     []typeinfo.Func
+	GenericFuncExprs []ast.Expr
+
 	RenamersX      []func(string, string) string
 	RenamersY      []func(string, string) string
 	CommonFindersX []func([]string) string
@@ -104,6 +113,8 @@ func (cfg *Config) Update(other Config) {
 	cfg.Funcs = append(cfg.Funcs, other.Funcs...)
 	cfg.FuncExprs = append(cfg.FuncExprs, other.FuncExprs...)
 	cfg.ErrWraps = append(cfg.ErrWraps, other.ErrWraps...)
+	cfg.GenericFuncs = append(cfg.GenericFuncs, other.GenericFuncs...)
+	cfg.GenericFuncExprs = append(cfg.GenericFuncExprs, other.GenericFuncExprs...)
 
 	cfg.RenamersX = append(cfg.RenamersX, other.RenamersX...)
 	cfg.RenamersY = append(cfg.RenamersY, other.RenamersY...)
@@ -355,13 +366,18 @@ func (p *Parser) ParseOptionImportFunc(c *Config, call *ast.CallExpr, hasErr boo
 		return err
 	}
 
-	fn, err := p.ParseFunc(expr, hasErr)
+	fn, wildcard, err := p.ParseFunc(expr, hasErr)
 	if err != nil {
 		return err
 	}
 
-	c.Funcs = append(c.Funcs, fn.WithPos(call.Pos()))
-	c.FuncExprs = append(c.FuncExprs, call)
+	if wildcard {
+		c.GenericFuncs = append(c.GenericFuncs, fn.WithPos(call.Pos()))
+		c.GenericFuncExprs = append(c.GenericFuncExprs, call)
+	} else {
+		c.Funcs = append(c.Funcs, fn.WithPos(call.Pos()))
+		c.FuncExprs = append(c.FuncExprs, call)
+	}
 	return nil
 }
 
@@ -594,9 +610,13 @@ func (p *Parser) ParseOptionMatch(c *Config, call *ast.CallExpr, ps parsers, wit
 	}
 	var fn typeinfo.Func
 	if withFn {
-		fn, err = p.ParseFunc(fnExpr, hasErr)
+		var wildcard bool
+		fn, wildcard, err = p.ParseFunc(fnExpr, hasErr)
 		if err != nil {
 			errs = errors.Join(errs, err)
+		} else if wildcard {
+			errs = errors.Join(errs, codefmt.Errorf(p, fnExpr,
+				"convgen.G wildcard registration is only supported with convgen.ImportFunc or convgen.ImportFuncErr, not convgen.MatchFunc"))
 		}
 	}
 	if errs != nil {

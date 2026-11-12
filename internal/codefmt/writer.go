@@ -106,6 +106,13 @@ func (w *Writer) importAST(node ast.Node) {
 	}, nil)
 }
 
+// ImportType records a package where the type is defined to import later. It
+// is the exported form of importType, for callers that need to register an
+// import for a type that was computed rather than printed from an ast.Expr or
+// types.Object (for example, a type argument solved by unification rather
+// than written in source).
+func (w *Writer) ImportType(t types.Type) { w.importType(t) }
+
 // importType records a package where the type is defined to import later.
 func (w *Writer) importType(typ types.Type) {
 	switch typ := typ.(type) {

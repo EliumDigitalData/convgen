@@ -128,6 +128,9 @@ func (fac *factory) build(x, y Object) (assigner, error) {
 	if as, err := fac.tryModuleFunc(x, y); !errors.Is(err, skip) {
 		return as, err
 	}
+	if as, err := fac.tryGenericModuleFunc(x, y); !errors.Is(err, skip) {
+		return as, err
+	}
 
 	// Primitive types
 	if as, err := fac.tryPointer(x, y); !errors.Is(err, skip) {

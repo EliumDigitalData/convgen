@@ -25,6 +25,12 @@ type Module struct {
 	// Lookup holds all converters and functions registered in this module.
 	*typeinfo.Lookup[typeinfo.Func]
 
+	// GenericFuncs holds wildcard generic converter registrations available to
+	// converters in this module. Unlike Lookup, these cannot be looked up by
+	// exact type; each candidate is tried via structural unification at assign
+	// time (assign.tryGenericModuleFunc).
+	GenericFuncs []typeinfo.Func
+
 	// Configs and Lookups for specific kinds of converters.
 	ConfigForStruct *Config
 	ConfigForUnion  *Config
@@ -171,26 +177,30 @@ func (p *Parser) ParseModule(call *ast.CallExpr, name string, fetchMod func(toke
 	}
 
 	// Register imported functions
-	lookup, err := p.newModuleLookup(cfg, nil)
+	lookup, generic, err := p.newModuleLookup(cfg, nil, nil)
 	errs = errors.Join(errs, err)
 
 	if cfg.ForStruct != nil {
-		_, err = p.newModuleLookup(*cfg.ForStruct, lookup)
+		_, _, err = p.newModuleLookup(*cfg.ForStruct, lookup, generic)
 		errs = errors.Join(errs, err)
 	}
 	if cfg.ForUnion != nil {
-		_, err = p.newModuleLookup(*cfg.ForUnion, lookup)
+		_, _, err = p.newModuleLookup(*cfg.ForUnion, lookup, generic)
 		errs = errors.Join(errs, err)
 	}
 	if cfg.ForEnum != nil {
-		_, err = p.newModuleLookup(*cfg.ForEnum, lookup)
+		_, _, err = p.newModuleLookup(*cfg.ForEnum, lookup, generic)
 		errs = errors.Join(errs, err)
 	}
 
-	return &Module{Name: name, Config: cfg, Lookup: lookup}, errs
+	return &Module{Name: name, Config: cfg, Lookup: lookup, GenericFuncs: generic}, errs
 }
 
-func (p *Parser) newModuleLookup(cfg Config, old *typeinfo.Lookup[typeinfo.Func]) (*typeinfo.Lookup[typeinfo.Func], error) {
+func (p *Parser) newModuleLookup(
+	cfg Config,
+	old *typeinfo.Lookup[typeinfo.Func],
+	oldGeneric []typeinfo.Func,
+) (*typeinfo.Lookup[typeinfo.Func], []typeinfo.Func, error) {
 	var errs error
 
 	lookup := typeinfo.NewLookup[typeinfo.Func]()
@@ -210,7 +220,34 @@ func (p *Parser) newModuleLookup(cfg Config, old *typeinfo.Lookup[typeinfo.Func]
 		}
 	}
 
-	return lookup, errs
+	generic := slices.Clone(oldGeneric)
+	for i, fn := range cfg.GenericFuncs {
+		if dup, ok := findDuplicateGenericFunc(generic, fn); ok {
+			err := codefmt.Errorf(p, cfg.GenericFuncExprs[i], `duplicate wildcard converter for %o
+	previous import at %b`,
+				dup, dup)
+			errs = errors.Join(errs, err)
+			continue
+		}
+		generic = append(generic, fn)
+	}
+
+	return lookup, generic, errs
+}
+
+// findDuplicateGenericFunc reports an existing wildcard registration backed by
+// the exact same generic declaration object as fn. It intentionally does not
+// attempt full structural-overlap detection between two *different* generic
+// functions whose patterns might both match the same concrete types — that is
+// a build-time ambiguity error instead (see assign.tryGenericModuleFunc), not
+// a parse-time static check.
+func findDuplicateGenericFunc(generic []typeinfo.Func, fn typeinfo.Func) (typeinfo.Func, bool) {
+	for _, g := range generic {
+		if g.Object() == fn.Object() {
+			return g, true
+		}
+	}
+	return nil, false
 }
 
 // ParseModuleArg parses a Convgen module type argument from the given
